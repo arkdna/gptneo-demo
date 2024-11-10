@@ -1,90 +1,70 @@
 from flask import Flask, request, jsonify, render_template
-from transformers import GPTNeoForCausalLM, GPT2Tokenizer
-import torch
-import gc
-from functools import lru_cache
+import sys
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-# CPU Optimization settings
-torch.set_num_threads(4)  # Adjust based on your CPU cores, don't use all cores
-torch.set_grad_enabled(False)  # Ensure gradients are disabled for inference
+print("Starting app initialization...")
+logger.debug("Debug logging enabled")
 
-# Load model with optimizations
-@lru_cache(maxsize=1)  # Cache the model loading
-def load_model():
-    model = GPTNeoForCausalLM.from_pretrained(
-        "EleutherAI/gpt-neo-1.3B",
-        low_cpu_mem_usage=False,
-        torch_dtype=torch.float32,
-        device_map=None
-    )
-    model.eval()
-    return model
+try:
+    print("Importing torch and transformers...")
+    from transformers import GPTNeoForCausalLM, GPT2Tokenizer
+    import torch
+    from functools import lru_cache
+    print("Imports successful")
 
-@lru_cache(maxsize=1)
-def load_tokenizer():
-    return GPT2Tokenizer.from_pretrained("EleutherAI/gpt-neo-1.3B")
+    # CPU Optimization settings
+    print("Configuring torch settings...")
+    torch.set_num_threads(4)
+    torch.set_grad_enabled(False)
+    print("Torch configured")
 
-# Initialize model and tokenizer
-model = load_model()
-tokenizer = load_tokenizer()
+    @lru_cache(maxsize=1)
+    def load_model():
+        print("Starting model load...")
+        try:
+            model = GPTNeoForCausalLM.from_pretrained(
+                "EleutherAI/gpt-neo-1.3B",
+                low_cpu_mem_usage=False,
+                torch_dtype=torch.float32,
+                device_map=None
+            )
+            print("Model loaded successfully")
+            model.eval()
+            return model
+        except Exception as e:
+            print(f"Error loading model: {str(e)}")
+            logger.exception("Model loading failed")
+            raise
+
+    @lru_cache(maxsize=1)
+    def load_tokenizer():
+        print("Loading tokenizer...")
+        return GPT2Tokenizer.from_pretrained("EleutherAI/gpt-neo-1.3B")
+
+    print("Initializing model and tokenizer...")
+    model = load_model()
+    tokenizer = load_tokenizer()
+    print("Initialization complete")
+
+except Exception as e:
+    print(f"Error during initialization: {str(e)}")
+    logger.exception("Initialization failed")
+    raise
 
 @app.route('/')
 def home():
     return render_template('index.html')
 
-@app.route('/generate', methods=['POST'])
-def generate():
-    try:
-        data = request.json
-        prompt = data.get('prompt', '')
-        
-        # Tokenize with max length limit
-        input_ids = tokenizer.encode(prompt, return_tensors='pt', truncation=True, max_length=512)
-        
-        # Generate with memory-efficient settings
-        with torch.no_grad():
-            output = model.generate(
-                input_ids,
-                max_length=100,  # Reduced for faster response
-                num_return_sequences=1,
-                no_repeat_ngram_size=2,
-                temperature=0.7,
-                pad_token_id=tokenizer.eos_token_id,
-                do_sample=True,
-                top_k=50,
-                top_p=0.95
-            )
-        
-        generated_text = tokenizer.decode(output[0], skip_special_tokens=True)
-        
-        # Clean up memory
-        gc.collect()
-        torch.cuda.empty_cache() if torch.cuda.is_available() else None
-        
-        return jsonify({
-            'status': 'success',
-            'response': generated_text
-        })
-    except Exception as e:
-        return jsonify({
-            'status': 'error',
-            'message': str(e)
-        }), 500
-
-@app.route('/health', methods=['GET'])
+@app.route('/health')
 def health():
-    memory_stats = {
-        'allocated': torch.cuda.memory_allocated() if torch.cuda.is_available() else 0,
-        'cached': torch.cuda.memory_reserved() if torch.cuda.is_available() else 0
-    }
-    return jsonify({
-        'status': 'healthy',
-        'device': 'cpu',
-        'threads': torch.get_num_threads(),
-        'memory': memory_stats
-    })
+    return jsonify({"status": "healthy"})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000) 
+    print("Starting Flask server...")
+    app.run(host='0.0.0.0', port=5000, debug=True) 
