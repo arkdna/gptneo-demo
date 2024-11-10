@@ -88,16 +88,20 @@
                     body: JSON.stringify({ prompt }),
                 });
 
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+
                 const data = await res.json();
                 
-                if (data.status === 'success') {
-                    response.textContent = data.response;
-                    result.classList.remove('hidden');
+                if (data.error) {
+                    response.textContent = 'Error: ' + data.error;
                 } else {
-                    response.textContent = 'Error: ' + data.message;
-                    result.classList.remove('hidden');
+                    response.textContent = data.response;
                 }
+                result.classList.remove('hidden');
             } catch (error) {
+                console.error('Error:', error);
                 response.textContent = 'Error: ' + error.message;
                 result.classList.remove('hidden');
             } finally {

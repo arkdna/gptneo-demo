@@ -79,9 +79,48 @@ def home():
     print(f"Looking for templates in: {template_dir}")  # Debug print
     return render_template('index.html')
 
+@app.route('/generate', methods=['POST'])
+def generate():
+    try:
+        data = request.get_json()
+        if not data or 'prompt' not in data:
+            return jsonify({'error': 'No prompt provided'}), 400
+
+        prompt = data['prompt']
+        print(f"Received prompt: {prompt}")  # Debug print
+
+        # Generate text
+        input_ids = tokenizer(prompt, return_tensors="pt").input_ids
+        attention_mask = torch.ones(input_ids.shape, dtype=torch.long)
+        
+        outputs = model.generate(
+            input_ids,
+            attention_mask=attention_mask,
+            max_length=100,
+            num_return_sequences=1,
+            no_repeat_ngram_size=2,
+            temperature=0.7
+        )
+        
+        response_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        print(f"Generated response: {response_text}")  # Debug print
+        
+        return jsonify({
+            'response': response_text,
+            'prompt': prompt
+        })
+
+    except Exception as e:
+        print(f"Error in generate(): {str(e)}")  # Debug print
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/health')
 def health():
-    return jsonify({"status": "healthy"})
+    return jsonify({
+        "status": "healthy",
+        "device": "cpu",  # or detect from torch
+        "threads": os.cpu_count()  # or your actual thread count
+    })
 
 if __name__ == '__main__':
     print("Starting Flask server...")
