@@ -11,9 +11,10 @@ logger = logging.getLogger(__name__)
 
 # Set up the Flask app with explicit template folder
 template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'templates'))
+static_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'static'))
 app = Flask(__name__, 
     template_folder=template_dir,
-    static_folder='static')
+    static_folder=static_dir)
 
 print("Starting app initialization...")
 logger.debug("Debug logging enabled")

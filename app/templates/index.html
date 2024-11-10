@@ -11,10 +11,10 @@
             font-family: 'Inter', sans-serif;
         }
         .ark-red {
-            background-color: #C41E3A;  /* Ark's red color */
+            background-color: #D6001C;  /* Ark's red color */
         }
         .ark-red-text {
-            color: #C41E3A;
+            color: #D6001C;
         }
         .loading {
             display: none;
@@ -28,7 +28,7 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background-color: #C41E3A;
+            background-color: #D6001C;
             animation: pulse 1.5s infinite;
         }
         .pulse-dot:nth-child(2) { animation-delay: 0.2s; }
@@ -50,7 +50,7 @@
         <div class="container mx-auto">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-6">
-                    <img src="/static/logo.png" alt="Ark Logo" class="h-8">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="Ark Logo" class="h-8">
                     <div>
                         <h1 class="text-2xl font-bold">Private Cloud AI Demo</h1>
                         <p class="text-white/80 mt-1">Demonstrating CPU Inference Capabilities</p>
