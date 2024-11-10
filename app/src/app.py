@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, render_template
 import sys
 import logging
+from tqdm import tqdm
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
@@ -26,13 +27,15 @@ try:
 
     @lru_cache(maxsize=1)
     def load_model():
-        print("Starting model load...")
+        print("Starting model load (this will download ~5GB on first run)...")
         try:
             model = GPTNeoForCausalLM.from_pretrained(
                 "EleutherAI/gpt-neo-1.3B",
                 low_cpu_mem_usage=False,
                 torch_dtype=torch.float32,
-                device_map=None
+                device_map=None,
+                local_files_only=False,
+                progress_bar=True
             )
             print("Model loaded successfully")
             model.eval()
