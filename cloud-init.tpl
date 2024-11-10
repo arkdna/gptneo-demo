@@ -13,6 +13,9 @@ packages:
   - python3
   - python3-pip
   - python3-venv
+  - python3-setuptools
+  - python3-distutils-extra
+  - build-essential
   - nginx
   - supervisor
   - git
@@ -20,11 +23,11 @@ packages:
 write_files:
   - path: /home/ubuntu/app/requirements.txt
     content: |
-      flask==2.0.1
-      torch==2.5.1
-      transformers==4.30.2
-      requests==2.31.0
-      numpy==1.24.3
+      flask>=2.0.1
+      torch>=2.2.0
+      transformers>=4.36.0
+      requests>=2.31.0
+      numpy>=1.24.3
 
   - path: /home/ubuntu/app/config/nginx/gptneo
     content: |
@@ -52,8 +55,9 @@ runcmd:
   - su - ubuntu -c "git clone https://github.com/arkdna/gptneo-demo.git /home/ubuntu/app"
   
   # Set up Python environment and install dependencies
-  - su - ubuntu -c "cd /home/ubuntu/app && python3 -m venv venv"
-  - su - ubuntu -c "cd /home/ubuntu/app && . venv/bin/activate && pip install --upgrade pip"
+  - su - ubuntu -c "cd /home/ubuntu/app && python3 -m venv venv --without-pip"
+  - su - ubuntu -c "cd /home/ubuntu/app && . venv/bin/activate && curl https://bootstrap.pypa.io/get-pip.py | python3"
+  - su - ubuntu -c "cd /home/ubuntu/app && . venv/bin/activate && pip install --upgrade pip setuptools wheel"
   - su - ubuntu -c "cd /home/ubuntu/app && . venv/bin/activate && pip install -r requirements.txt"
   
   # Configure nginx and supervisor

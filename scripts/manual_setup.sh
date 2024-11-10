@@ -16,6 +16,9 @@ sudo apt-get install -y \
     python3 \
     python3-pip \
     python3-venv \
+    python3-setuptools \
+    python3-distutils-extra \
+    build-essential \
     nginx \
     supervisor \
     git
@@ -39,12 +42,10 @@ fi
 # Set up Python virtual environment
 echo "Setting up Python virtual environment..."
 cd $APP_DIR
-python3 -m venv venv
+python3 -m venv venv --without-pip
 source venv/bin/activate
-
-# Install Python dependencies
-echo "Installing Python dependencies..."
-pip install --upgrade pip
+curl https://bootstrap.pypa.io/get-pip.py | python3
+pip install --upgrade pip setuptools wheel
 pip install -r app/requirements.txt
 
 # Configure Nginx
