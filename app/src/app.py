@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, render_template
 import sys
 import logging
+import requests
 from tqdm import tqdm
 
 # Set up logging
@@ -11,6 +12,18 @@ app = Flask(__name__)
 
 print("Starting app initialization...")
 logger.debug("Debug logging enabled")
+
+def download_with_progress(url, filename):
+    response = requests.get(url, stream=True)
+    total_size = int(response.headers.get('content-length', 0))
+    block_size = 1024
+    progress_bar = tqdm(total=total_size, unit='iB', unit_scale=True)
+    
+    with open(filename, 'wb') as f:
+        for data in response.iter_content(block_size):
+            progress_bar.update(len(data))
+            f.write(data)
+    progress_bar.close()
 
 try:
     print("Importing torch and transformers...")
@@ -27,15 +40,13 @@ try:
 
     @lru_cache(maxsize=1)
     def load_model():
-        print("Starting model load (this will download ~5GB on first run)...")
+        print("Starting model load (this will download ~125M model for testing)...")
         try:
             model = GPTNeoForCausalLM.from_pretrained(
-                "EleutherAI/gpt-neo-1.3B",
+                "EleutherAI/gpt-neo-125M",  # Smaller model for testing
                 low_cpu_mem_usage=False,
                 torch_dtype=torch.float32,
-                device_map=None,
-                local_files_only=False,
-                progress_bar=True
+                device_map=None
             )
             print("Model loaded successfully")
             model.eval()
@@ -48,7 +59,7 @@ try:
     @lru_cache(maxsize=1)
     def load_tokenizer():
         print("Loading tokenizer...")
-        return GPT2Tokenizer.from_pretrained("EleutherAI/gpt-neo-1.3B")
+        return GPT2Tokenizer.from_pretrained("EleutherAI/gpt-neo-125M")  # Match the model size
 
     print("Initializing model and tokenizer...")
     model = load_model()
