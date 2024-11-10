@@ -43,6 +43,13 @@ resource "vcd_vapp_vm" "vm" {
   cpu_hot_add_enabled    = var.vm_cpu_hot_add_enabled
   memory_hot_add_enabled = var.vm_memory_hot_add_enabled
 
+  override_template_disk {
+    bus_type        = "paravirtual"
+    size_in_mb      = var.vm_disk_size
+    bus_number      = 0
+    unit_number     = 0
+  }
+
   # OS Template
   catalog_name  = var.vm_catalog_name
   template_name = var.template_name

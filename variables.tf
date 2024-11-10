@@ -99,3 +99,9 @@ variable "vm_ip" {
   description = "Static IP address for the VM"
   type        = string
 }
+
+variable "vm_disk_size" {
+  description = "Size of the VM's disk in MB"
+  type        = number
+  default     = 81920  # 80 GB
+}

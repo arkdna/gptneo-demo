@@ -39,7 +39,7 @@ else
     git clone https://github.com/arkdna/gptneo-demo.git $APP_DIR
 fi
 
-# Set up Python virtual environment
+# Set up Python virtual environment with updated commands
 echo "Setting up Python virtual environment..."
 cd $APP_DIR
 python3 -m venv venv --without-pip
@@ -69,18 +69,31 @@ EOF
 sudo ln -sf /etc/nginx/sites-available/gptneo /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
 
-# Configure Supervisor
+# Configure Supervisor with the correct path and environment
 echo "Configuring Supervisor..."
 sudo tee /etc/supervisor/conf.d/gptneo.conf << EOF
 [program:gptneo]
-directory=/home/ubuntu/app
-command=/home/ubuntu/app/venv/bin/python src/app.py
+directory=/home/ubuntu/app/app/src
+command=/home/ubuntu/app/venv/bin/python3 app.py
 user=ubuntu
 autostart=true
 autorestart=true
 stderr_logfile=/var/log/gptneo.err.log
 stdout_logfile=/var/log/gptneo.out.log
+environment=PATH="/home/ubuntu/app/venv/bin"
+startsecs=5
+stopwaitsecs=5
 EOF
+
+# Restart supervisor to apply changes
+echo "Restarting supervisor..."
+sudo supervisorctl reread
+sudo supervisorctl update
+sudo supervisorctl status gptneo
+
+# Check logs for any new errors
+echo "Checking logs..."
+sudo tail -n 50 /var/log/gptneo.err.log
 
 # Set correct permissions
 echo "Setting permissions..."
@@ -92,13 +105,20 @@ sudo ufw allow 22/tcp
 sudo ufw allow 80/tcp
 sudo ufw --force enable
 
-# Restart services
+# Restart services with debug output
 echo "Restarting services..."
 sudo systemctl restart nginx
-sudo systemctl enable supervisor
+
+echo "Checking supervisor configuration..."
 sudo supervisorctl reread
 sudo supervisorctl update
-sudo supervisorctl restart all
+
+echo "Checking application logs..."
+sudo tail -n 50 /var/log/gptneo.err.log
+sudo tail -n 50 /var/log/gptneo.out.log
+
+echo "Checking supervisor status..."
+sudo supervisorctl status
 
 # Final status check
 echo "Checking service status..."

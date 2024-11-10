@@ -42,6 +42,7 @@ vm_cpu_hot_add_enabled = ${VM_CPU_HOT_ADD_ENABLED:-true}
 vm_memory_hot_add_enabled = ${VM_MEMORY_HOT_ADD_ENABLED:-true}
 vm_catalog_name         = "${VM_CATALOG_NAME:-Local Catalog}"
 vm_ip                   = "${VM_IP}"
+vm_disk_size            = ${VM_DISK_SIZE:-81920}
 EOF
 
 # Initialize Terraform

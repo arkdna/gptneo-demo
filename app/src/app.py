@@ -15,9 +15,9 @@ torch.set_grad_enabled(False)  # Ensure gradients are disabled for inference
 def load_model():
     model = GPTNeoForCausalLM.from_pretrained(
         "EleutherAI/gpt-neo-1.3B",
-        low_cpu_mem_usage=True,
+        low_cpu_mem_usage=False,
         torch_dtype=torch.float32,
-        device_map='auto'
+        device_map=None
     )
     model.eval()
     return model
