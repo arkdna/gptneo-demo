@@ -21,7 +21,7 @@ write_files:
   - path: /home/ubuntu/app/requirements.txt
     content: |
       flask==2.0.1
-      torch==2.0.1
+      torch==2.5.1
       transformers==4.30.2
       requests==2.31.0
       numpy==1.24.3

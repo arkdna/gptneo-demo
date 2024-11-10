@@ -45,7 +45,7 @@ source venv/bin/activate
 # Install Python dependencies
 echo "Installing Python dependencies..."
 pip install --upgrade pip
-pip install -r requirements.txt
+pip install -r app/requirements.txt
 
 # Configure Nginx
 echo "Configuring Nginx..."
