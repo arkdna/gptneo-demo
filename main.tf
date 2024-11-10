@@ -9,12 +9,12 @@ terraform {
 }
 
 provider "vcd" {
-  user                 = "administrator"
-  password            = var.vcd_password
+  user                 = var.vcd_user
+  password             = var.vcd_password
   auth_type           = "integrated"
-  org                 = "APT001"
-  vdc                 = "apt001-ccm"
-  url                 = "https://central1.arkdnacloud.com/api"
+  org                 = var.vcd_org
+  vdc                 = var.vcd_vdc
+  url                 = var.vcd_url
   allow_unverified_ssl = true
 }
 
@@ -27,7 +27,7 @@ resource "vcd_vapp" "vapp" {
 # Connect vApp to org network
 resource "vcd_vapp_org_network" "vappnet" {
   vapp_name        = vcd_vapp.vapp.name
-  org_network_name = "Trust"
+  org_network_name = var.network_segment
 }
 
 # Create the VM within the vApp
@@ -37,22 +37,22 @@ resource "vcd_vapp_vm" "vm" {
   computer_name = var.vm_name
   
   # Hardware configuration
-  memory        = 32768  # 32 GB
-  cpus          = 16
-  cpu_cores     = 1
-  cpu_hot_add_enabled = true
-  memory_hot_add_enabled = true
+  memory                 = var.vm_memory
+  cpus                   = var.vm_cpus
+  cpu_cores              = var.vm_cpu_cores
+  cpu_hot_add_enabled    = var.vm_cpu_hot_add_enabled
+  memory_hot_add_enabled = var.vm_memory_hot_add_enabled
 
   # OS Template
-  catalog_name  = "Local Catalog"
-  template_name = "ubuntu-24-04-template"
+  catalog_name  = var.vm_catalog_name
+  template_name = var.template_name
   
   # Network configuration
   network {
     type               = "org"
-    name               = "Trust"
+    name               = var.network_segment
     ip_allocation_mode = "MANUAL"
-    ip                = "10.0.0.100"
+    ip                = var.vm_ip
     adapter_type      = "VMXNET3"
     connected         = true
   }

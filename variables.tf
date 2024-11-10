@@ -1,6 +1,7 @@
 variable "vcd_user" {
   description = "VCD administrator username"
   type        = string
+  default     = "administrator"
 }
 
 variable "vcd_password" {
@@ -27,16 +28,19 @@ variable "vcd_url" {
 variable "network_segment" {
   description = "Network segment to connect the VM to"
   type        = string
+  default     = "default-network"
 }
 
 variable "template_name" {
   description = "Name of the VM template to use"
   type        = string
+  default     = "ubuntu-template"
 }
 
 variable "vm_name" {
   description = "Name of the VM and vApp to be created"
   type        = string
+  default     = "gptneo-vm"
 }
 
 variable "ssh_public_key" {
@@ -52,4 +56,46 @@ variable "default_gateway" {
 variable "dns_servers" {
   description = "List of DNS servers"
   type        = list(string)
+  default     = ["8.8.8.8", "8.8.4.4"]
+}
+
+variable "vm_memory" {
+  description = "Memory in MB for the VM"
+  type        = number
+  default     = 32768  # 32 GB
+}
+
+variable "vm_cpus" {
+  description = "Number of CPUs for the VM"
+  type        = number
+  default     = 16
+}
+
+variable "vm_cpu_cores" {
+  description = "Number of cores per CPU for the VM"
+  type        = number
+  default     = 1
+}
+
+variable "vm_cpu_hot_add_enabled" {
+  description = "Enable CPU hot add"
+  type        = bool
+  default     = true
+}
+
+variable "vm_memory_hot_add_enabled" {
+  description = "Enable memory hot add"
+  type        = bool
+  default     = true
+}
+
+variable "vm_catalog_name" {
+  description = "Name of the catalog containing the VM template"
+  type        = string
+  default     = "Local Catalog"
+}
+
+variable "vm_ip" {
+  description = "Static IP address for the VM"
+  type        = string
 }
